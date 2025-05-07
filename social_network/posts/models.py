@@ -13,10 +13,10 @@ class Post(models.Model):
     objects = None
     title = models.CharField(max_length=200)
     content = models.TextField()
-    author = models.ForeignKey('auth.User', related_name = 'post', on_delete = models.CASCADE)
-    creation_date = models.DateTimeField(default = timezone.now)
+    author = models.ForeignKey('auth.User', related_name='post', on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(default=timezone.now)
     tags = models.ManyToManyField('Tag', blank=True)
-    likes = models.ManyToManyField('auth.User', through = 'Like', related_name = 'Liked_posts', blank=True)
+    likes = models.ManyToManyField('auth.User', through='Like', related_name='Liked_posts', blank=True)
 
     class Meta:
         db_table = 'blog_posts'
@@ -33,18 +33,18 @@ def publish(self):
     self.save()
 
 def like(self, user):
-    Like.objects.create (post = self, user = user)
+    Like.objects.create(post=self, user=user)
 
-def unlike(self , user):
-    Like.objects.filter (post = self, user = user).delete()
+def unlike(self, user):
+    Like.objects.filter(post=self, user=user).delete()
 
 def __str__ (self):
     return  self.title
 
 class PostImage(models.Model):
-     post = models.ForeignKey('Post', on_delete = models.CASCADE, related_name = 'images')
-     image = models.ImageField(upload_to = 'post_images/')
-     creation_date = models.DateTimeField(auto_now_add = True)
+     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='images')
+     image = models.ImageField(upload_to='post_images/')
+     creation_date = models.DateTimeField(auto_now_add=True)
 
      def __str__ (self):
         return f"image for {self.post.title}"

@@ -1,24 +1,25 @@
-from django.shortcuts import render
 from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework import status
 
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .models import Post
+from .serializers import PostSerializer
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     def perform_create(self, serializer):
-        serializer.save(author = self.request.user)
+        serializer.save(author=self.request.user)
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    def update(self, request, *args, **kwargs):
+        post = self.get_object()
+        if post.author != request.user:
+            return Response({'detail': 'У вас нет прав для редактирования этого поста.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        post_id = self.kwargs['post=pk']
-        post = Post.objects.get(pk=post_id)
-        serializer.self(author=self.request.user, post=post)
-
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        if post.author != request.user:
+            return Response({'detail': 'У вас нет прав для удаления этого поста.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)

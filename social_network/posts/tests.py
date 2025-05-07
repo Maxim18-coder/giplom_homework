@@ -1,29 +1,29 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Post, Comment
+from rest_framework.test import APIClient
+from .models import Post
 
-class PostModelTest(TestCase):
-
+class PostAPITest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='test_user', password = 'test_password')
-        self.post = Post.objects.create_user(title='test_title', content='test_content', author=self.user)
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.post = Post.objects.create(title='Test Title', content='Test Content', author=self.user)
 
-    def test_post_creation(self):
-        self.assertEqual(self.post.title, 'test_title')
-        self.assertEqual(self.post.content, 'test_content')
-        self.assertEqual(self.post.author.username, 'test_user')
+    def test_create_post(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post('/api/posts/', {'title': 'New Post', 'content': 'Some content'})
+        self.assertEqual(response.status_code, 201)
 
-class CommentModelTest(TestCase):
+    def test_update_post(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(f'/api/posts/{self.post.id}/', {'title': 'Updated Title'})
+        self.assertEqual(response.status_code, 200)
+        updated_post = Post.objects.get(id=self.post.id)
+        self.assertEqual(updated_post.title, 'Updated Title')
 
-    def setUp(self):
-        self.user_1 = User.objects.create_user(username = 'test_user_1', password='test_password_1')
-        self.user_2 = User.objects.create_user(username = 'test_user_2', password='test_password_2')
-        self.post = Post.objects.create_uder(title='test_title_2', content='test_content_2', author=self.user_1)
-        self.comment = Comment.objects.create(author=self.user_2, post=self.post, content='test_comment')
-
-    def test_comment_creation(self):
-        self.assertEqual(self.comment.content, 'test_comment')
-        self.assertEqual(self.comment.author.username, 'test_user_2')
-
-
-
+    def test_delete_post(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(f'/api/posts/{self.post.id}/')
+        self.assertEqual(response.status_code, 204)
+        with self.assertRaises(Post.DoesNotExist):
+            Post.objects.get(id=self.post.id)
