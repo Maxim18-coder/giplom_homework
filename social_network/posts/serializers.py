@@ -12,13 +12,21 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['author', 'content', 'creation_date']
+        fields = ['id', 'author', 'content', 'creation_date']
         read_only_fields = ['author', 'creation_date']
 
 class PostImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostImage
         fields = ['image', 'creation_date']
+
+class LikeSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Like
+        fields = ['id', 'user', 'creation_date']
+        read_only_fields = ['user', 'creation_date']
 
 class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
