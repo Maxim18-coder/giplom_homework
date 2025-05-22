@@ -9,7 +9,7 @@ class Post(models.Model):
     content = models.TextField()
     author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     creation_date = models.DateTimeField(default=timezone.now)
-    tags = models.ManyToManyField('Tag', blank=True)  # если есть модель Tag
+    tags = models.ManyToManyField('Tag', blank=True)
     likes = models.ManyToManyField(User, through='Like', related_name='liked_posts', blank=True)
 
     def __str__(self):
