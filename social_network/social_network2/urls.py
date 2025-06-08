@@ -1,5 +1,5 @@
 """
-URL configuration for social_network project.
+URL configuration for social_network2 project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -16,13 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from .views import PostViewSet, CommentViewSet
+
+import social_network
+from social_network.posts.views import PostViewSet, CommentViewSet, LikeViewSet, PostImageViewSet
 
 router = DefaultRouter()
 router.register(r'posts', PostViewSet)
+router.register(r'comments', CommentViewSet)
+router.register(r'likes', LikeViewSet)
+router.register(r'images', PostImageViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-]
+
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

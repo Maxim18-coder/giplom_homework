@@ -1,14 +1,29 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Post, Like
-from .serializers import PostSerializer
-
+from .models import Post, Like, Comment, PostImage
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer, PostImageSerializer
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
+
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class LikeViewSet(viewsets.ModelViewSet):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class PostImageViewSet(viewsets.ModelViewSet):
+    queryset = PostImage.objects.all()
+    serializer_class = PostImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

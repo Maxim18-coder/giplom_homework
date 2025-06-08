@@ -31,13 +31,14 @@ class LikeSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     images = PostImageSerializer(many=True, read_only=True)
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     likes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'title', 'content', 'author', 'creation_date',
-            'comments', 'likes_count', 'images'
+            'comments', 'likes_count', 'images',
         ]
         read_only_fields = ['author', 'creation_date']
 
