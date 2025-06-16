@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Post, Like, Comment, PostImage
@@ -6,14 +7,28 @@ from .serializers import PostSerializer, CommentSerializer, LikeSerializer, Post
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
-
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            raise PermissionDenied("Вы не можете редактировать чужой пост.")
+        serializer.save()
+
+    def perform_destroy(self, serializer):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            raise PermissionDenied("Вы не можете удалить чужой пост.")
+        super().perform_destroy(instance)
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Like.objects.all()
